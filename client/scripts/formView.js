@@ -18,6 +18,7 @@ var FormView = {
     };
 
     Parse.create(message, (data) => {
+      console.log('Successful post');
       _.extend(message, data);
       Messages.add(message, MessagesView.render);
     });

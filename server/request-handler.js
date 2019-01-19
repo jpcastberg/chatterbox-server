@@ -33,7 +33,7 @@ var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
-  var statusCode = 200;
+  var statusCode = 404;
 
   // See the note below about CORS headers.
   var defaultCorsHeaders = {
@@ -49,8 +49,10 @@ var requestHandler = function(request, response) {
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
+
   
-  if (request.method === 'POST') {
+  
+  if (request.method === 'POST' && request.url === '/classes/messages') {
     statusCode = 201;
     let body = [];
 
@@ -63,30 +65,37 @@ var requestHandler = function(request, response) {
       //console.log(body);
       body = JSON.parse(body);
       data.messages.results.push(body);
-      console.log(data.messages.results);
+      //console.log(data.messages.results);
+      response.writeHead(statusCode, headers);
+      //response.write(JSON.stringify('success'));
+      response.end(JSON.stringify('success'));
     });
     //call newMessage method on data.js
-  }
-
-  if (request.method === 'GET' && request.url === '/?order=-createdAt') {
+  } else if (request.method === 'GET' && request.url === '/classes/messages') {
+    //console.log('test123');
     statusCode = 200;
     response.writeHead(statusCode, headers);
-    console.log(JSON.stringify(data.messages));
+    //console.log(JSON.stringify(data.messages));
     response.end(JSON.stringify(data.messages));
+  } else if (request.method === 'OPTIONS') {
+    statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify('successful options'));
+  } else {
+    // .writeHead() writes to the request line and headers of the response,
+    // which includes the status and all headers.
+    response.writeHead(statusCode, headers);
+
+    // Make sure to always call response.end() - Node may not send
+    // anything back to the client until you do. The string you pass to
+    // response.end() will be the body of the response - i.e. what shows
+    // up in the browser.
+    //
+    // Calling .end "flushes" the response's internal buffer, forcing
+    // node to actually send all the data over to the client.
+    //console.log(statusCode);
+    response.end();
   }
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
-
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  response.end();
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).

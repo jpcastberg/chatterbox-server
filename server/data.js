@@ -6,6 +6,6 @@ var testMsg = {
   roomname : 'lobby',
   text : 'test message yay!'
 };
-messages.results.push(testMsg);
+//messages.results.push(testMsg);
 
 exports.messages = messages;
