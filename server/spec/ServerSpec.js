@@ -103,4 +103,41 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should assign a unique ID to new messages', function() {
+    var stubMsg = {
+      username: 'Bono',
+      text: 'Yeah Yeah Yeah!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(2);
+    expect(messages[2].username).to.equal('Bono');
+    expect(messages[2].text).to.equal('Yeah Yeah Yeah!');
+    expect(messages[2].hasOwnProperty('objectId')).to.equal(true);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should record time received on new messages', function() {
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages[2].hasOwnProperty('createdAt')).to.equal(true);
+    expect(res._ended).to.equal(true);
+  });
+
 });
