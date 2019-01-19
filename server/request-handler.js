@@ -50,7 +50,12 @@ var requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
 
-  
+  var idGenerator = function () {
+    var S4 = function() {
+      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    };
+    return (S4() + S4() + '-' + S4());
+  };
   
   if (request.method === 'POST' && request.url === '/classes/messages') {
     statusCode = 201;
@@ -64,11 +69,21 @@ var requestHandler = function(request, response) {
       body = Buffer.concat(body).toString();
       //console.log(body);
       body = JSON.parse(body);
+
+      var id = body.objectId = idGenerator();
+
+      var createdAt = body.createdAt = new Date();
+
+      var metaData = {
+        objectId: id,
+        createdAt: createdAt
+      };
+
       data.messages.results.push(body);
       //console.log(data.messages.results);
       response.writeHead(statusCode, headers);
       //response.write(JSON.stringify('success'));
-      response.end(JSON.stringify('success'));
+      response.end(JSON.stringify(metaData));
     });
     //call newMessage method on data.js
   } else if (request.method === 'GET' && request.url === '/classes/messages') {
